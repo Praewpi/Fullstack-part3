@@ -1,4 +1,5 @@
 const express = require('express')
+const morgan = require('morgan')
 //function that is used to create an express application stored in the app variable
 const app = express()
 app.use(express.json()) //express json-parser 
@@ -87,7 +88,7 @@ app.post('/api/persons', (request, response) => {
     response.json(person)
   })
 
-  
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
