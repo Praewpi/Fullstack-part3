@@ -25,8 +25,15 @@ let persons= [
     }
 ]
 
+// show list of people in json
 app.get('/api/persons', (request, response) => {
     response.json(persons)
+  })
+
+// info page, use response.end() so, no further data can be sent in the response.
+app.get('/info', (request, response) => {
+    const info = `Phonebook has info for ${persons.length} people \n\n${Date()}`
+    response.end(`${info}`)
   })
 
 const PORT = 3001
