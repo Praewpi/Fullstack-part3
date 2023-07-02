@@ -36,6 +36,20 @@ app.get('/info', (request, response) => {
     response.end(`${info}`)
   })
 
+// displaying the information for a single phonebook entry. 
+app.get('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  const person = persons.find(note => note.id === id)
+
+  // if no person found the server  respond with the status code 404.
+ if (person) {
+    response.json(person)
+  } else {
+    response.status(404).end()
+  }
+})
+
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
