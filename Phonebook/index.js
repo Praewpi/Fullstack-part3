@@ -27,12 +27,11 @@ let persons= [
     }
 ]
 
-//morgan tiny
+//morgan
+morgan.token('body', (request, response) => JSON.stringify(request.body))
 app.use(morgan(
-    ':method :url :status :res[content-length] - :response-time ms'
-  ))
-
-
+  ':method :url :status :res[content-length] - :response-time ms :body'
+))
 
 // show list of people in json
 app.get('/api/persons', (request, response) => {
