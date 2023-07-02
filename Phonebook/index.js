@@ -1,6 +1,7 @@
 const express = require('express')
 //function that is used to create an express application stored in the app variable
 const app = express()
+app.use(express.json()) //express json-parser 
 
 let persons= [
     { 
@@ -56,6 +57,24 @@ app.delete('/api/persons/:id', (request, response) => {
   
     response.status(204).end()
   })
+
+
+  //add
+  app.post('/api/persons', (request, response) => {
+    const body = request.body
+  
+    const person = {
+      name: body.name,
+      number: body.number,
+      id: Math.floor(Math.random() * 1000)
+    }
+  
+    persons = persons.concat(person)
+    console.log(person)
+    response.json(person)
+  })
+
+
 
 
 
