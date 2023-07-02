@@ -38,16 +38,25 @@ app.get('/info', (request, response) => {
 
 // displaying the information for a single phonebook entry. 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(note => note.id === id)
+    const id = Number(request.params.id)
+    const person = persons.find(note => note.id === id)
 
-  // if no person found the server  respond with the status code 404.
- if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
-  }
-})
+    // if no person found the server  respond with the status code 404.
+    if (person) {
+        response.json(person)
+    } else {
+        response.status(404).end()
+    }
+  })
+
+//delete
+app.delete('/api/persons/:id', (request, response) => {
+    const id = Number(request.params.id)
+    person = persons.filter(note => note.id !== id)
+  
+    response.status(204).end()
+  })
+
 
 
 const PORT = 3001
