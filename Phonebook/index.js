@@ -1,8 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 //function that is used to create an express application stored in the app variable
 const app = express()
 app.use(express.json()) //express json-parser 
+app.use(cors())
+app.use(express.static('build'))
 
 let persons= [
     { 
@@ -60,11 +63,10 @@ app.get('/api/persons/:id', (request, response) => {
 //delete
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    person = persons.filter(note => note.id !== id)
+    persons = persons.filter(note => note.id !== id)
   
     response.status(204).end()
   })
-
 
 //add
 app.post('/api/persons', (request, response) => {
@@ -95,7 +97,7 @@ app.post('/api/persons', (request, response) => {
   })
 
 
-const PORT = 3001
+const PORT = process.env.PORT || "3001"
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
