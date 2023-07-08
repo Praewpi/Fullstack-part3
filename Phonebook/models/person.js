@@ -15,8 +15,48 @@ mongoose.connect(url)
   })
 
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+
+  //Expand the validation 
+  name: {
+    type: String,
+    minLength: 3,
+    required: true
+  },
+  number: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function(number) {
+        if (number.length < 8) {
+          return false
+        }
+        const splitedNumber = number.split('-')
+        if (splitedNumber.length > 2) {
+          return false
+        }
+        if (splitedNumber.length !== 2) {
+          return false;
+        }
+        // form are separated by "-"
+        // the first part should have two or three numbers
+        if (
+          splitedNumber.length === 2 &&
+          (splitedNumber[0].length < 2 || splitedNumber[0].length > 3 )
+        ) {
+          return false
+        }
+
+        // all elements should be numbers
+        splitedNumber.forEach(element => {
+          if (isNaN(element)) {
+            return false
+          }
+        })
+
+        return true
+      }
+    }
+  },
 })
   
 personSchema.set('toJSON', {
