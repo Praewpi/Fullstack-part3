@@ -1,14 +1,10 @@
 require('dotenv').config()
 const express = require('express')
+//function that is used to create an express application stored in the app variable
+const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person') //Importing the module from person.js
-
-//function that is used to create an express application stored in the app variable
-const app = express()
-app.use(express.json()) //express json-parser 
-app.use(cors())
-app.use(express.static('build'))
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -17,31 +13,25 @@ const requestLogger = (request, response, next) => {
   console.log('---')
   next()
 }
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
 
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(cors())
+app.use(express.static('build'))
+app.use(express.json()) //express json-parser 
 app.use(requestLogger)
-
-let persons= [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
+//let persons = []
 
 //morgan
 morgan.token('body', (request, response) => JSON.stringify(request.body))
@@ -65,33 +55,51 @@ app.get('/api/persons', (request, response) => {
   
 // info page, use response.end() so, no further data can be sent in the response.
 app.get('/info', (request, response) => {
-    const info = `Phonebook has info for ${persons.length} people \n\n${Date()}`
-    response.end(`${info}`)
-  })
-
-// displaying the information for a single phonebook entry. 
-app.get('/api/persons/:id', (request, response) => {
-    // const id = Number(request.params.id)
-    // const person = persons.find(note => note.id === id)
-
-    // // if no person found the server  respond with the status code 404.
-    // if (person) {
-    //     response.json(person)
-    // } else {
-    //     response.status(404).end()
-    // }
-    Person.findById(request.params.id).then(note => {
-      response.json(note)
+    Person.find({}).then(persons => {
+      const info = `Phonebook has info for ${persons.length} people \n\n${Date()}`
+      response.end(`${info}`)
     })
   })
 
+// displaying the information for a single phonebook entry. 
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
+  })
+
+
 //delete
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(note => note.id !== id)
-  
+app.delete('/api/persons/:id', (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id)
+  .then(result => {
     response.status(204).end()
   })
+  .catch(error => next(error))
+})
+
+//update 
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
 
 //add
 app.post('/api/persons', (request, response) => {
@@ -102,13 +110,13 @@ app.post('/api/persons', (request, response) => {
           error: 'content missing' 
         })
       }
-
-    const names = persons.map(person => person.name)
-    if (names.includes(body.name)) {
-    return response.status(400).json({ 
-        error: 'name must be unique' 
-    })
-    }
+// for unique person!
+    // const names = persons.map(person => person.name)
+    // if (names.includes(body.name)) {
+    // return response.status(400).json({ 
+    //     error: 'name must be unique' 
+    // })
+    // }
 
     const person = new Person({
       name: body.name,
@@ -121,6 +129,11 @@ app.post('/api/persons', (request, response) => {
     response.json(savedPerson)
     })
   })
+
+
+// those middleware has to be loaded the lastest
+app.use(unknownEndpoint)
+app.use(errorHandler)
 
 const PORT = process.env.PORT || '3001'
 app.listen(PORT, () => {
