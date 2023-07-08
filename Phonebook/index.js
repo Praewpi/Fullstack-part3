@@ -32,7 +32,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(cors())
 app.use(express.static('build'))
-app.use(express.json()) //express json-parser 
+app.use(express.json()) //express json-parser
 app.use(requestLogger)
 //let persons = []
 
@@ -42,31 +42,30 @@ app.use(morgan(
   ':method :url :status :res[content-length] - :response-time ms :body'
 ))
 
-
 // show list of people in json
 app.get('/api/persons', (request, response) => {
-   // response.json(persons)
-   Person.find({}).then(persons => {
+  // response.json(persons)
+  Person.find({}).then(persons => {
     console.log(persons)
     response.json(persons)
-   })
   })
+})
 // test
-  app.get('/', (request, response) => {
-    response.send('<h1>Hello World!</h1>')
-  })
-  
-// info page, use response.end() so, no further data can be sent in the response.
-app.get('/info', (request, response) => {
-    Person.find({}).then(persons => {
-      const info = `Phonebook has info for ${persons.length} people \n\n${Date()}`
-      response.end(`${info}`)
-    })
-  })
+app.get('/', (request, response) => {
+  response.send('<h1>Hello World!</h1>')
+})
 
-// displaying the information for a single phonebook entry. 
+// info page, use response.end() so, no further data can be sent in the response
+app.get('/info', (request, response) => {
+  Person.find({}).then(persons => {
+    const info = `Phonebook has info for ${persons.length} people \n\n${Date()}`
+    response.end(`${info}`)
+  })
+})
+
+// displaying the information for a single phonebook entry
 app.get('/api/persons/:id', (request, response, next) => {
-    Person.findById(request.params.id)
+  Person.findById(request.params.id)
     .then(person => {
       if (person) {
         response.json(person)
@@ -75,19 +74,18 @@ app.get('/api/persons/:id', (request, response, next) => {
       }
     })
     .catch(error => next(error))
-  })
-
+})
 
 //delete
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-  .then(result => {
-    response.status(204).end()
-  })
-  .catch(error => next(error))
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
-//update 
+//update
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
 
@@ -103,31 +101,29 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-
 //add
 app.post('/api/persons', (request, response, next) => {
-    const body = request.body
-    
-    if (!(body.name && body.number)) {
-        return response.status(400).json({ 
-          error: 'content missing' 
-        })
-      }
+  const body = request.body
 
-    const person = new Person({
-      name: body.name,
-      number: body.number,
-      id: Math.floor(Math.random() * 1000)
+  if (!(body.name && body.number)) {
+    return response.status(400).json({
+      error: 'content missing'
     })
+  }
 
-    person.save()
-    .then(savedPerson => {
-    console.log(person)
-    response.json(savedPerson)
-    })
-    .catch(error => next(error))
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+    id: Math.floor(Math.random() * 1000)
   })
 
+  person.save()
+    .then(savedPerson => {
+      console.log(person)
+      response.json(savedPerson)
+    })
+    .catch(error => next(error))
+})
 
 // those middleware has to be loaded the lastest
 app.use(unknownEndpoint)

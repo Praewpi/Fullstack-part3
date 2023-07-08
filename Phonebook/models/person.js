@@ -16,7 +16,7 @@ mongoose.connect(url)
 
 const personSchema = new mongoose.Schema({
 
-  //Expand the validation 
+  //Expand the validation
   name: {
     type: String,
     minLength: 3,
@@ -35,7 +35,7 @@ const personSchema = new mongoose.Schema({
           return false
         }
         if (splitedNumber.length !== 2) {
-          return false;
+          return false
         }
         // form are separated by "-"
         // the first part should have two or three numbers
@@ -58,13 +58,13 @@ const personSchema = new mongoose.Schema({
     }
   },
 })
-  
+
 personSchema.set('toJSON', {
- transform: (document, returnedObject) => {
+  transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v
-}
+  }
 })
 
 module.exports = mongoose.model('Person', personSchema)
